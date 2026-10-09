@@ -16,6 +16,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.Alignment
 import com.example.listycity.ui.theme.ListyCityTheme
 
 @Composable
@@ -32,6 +36,7 @@ fun CityListScreen(
     cities: List<City>,
     onAddCity: (City) -> Unit,
     onUpdateCity: (City, City) -> Unit,
+    onDeleteCity: (City) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var newCityName by remember { mutableStateOf("") }
@@ -166,6 +171,14 @@ fun CityListScreen(
                         selectedCity = city
                         editedCityName = city.name
                         editedProvinceName = city.province
+                    },
+                    onDelete = {
+                        if (selectedCity == city) {
+                            selectedCity = null
+                            editedCityName = ""
+                            editedProvinceName = ""
+                        }
+                        onDeleteCity(city)
                     }
                 )
                 if (index < cities.lastIndex) {
@@ -180,25 +193,27 @@ fun CityListScreen(
 @Composable
 fun CityRow(
     city: City,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = city.name,
-            fontSize = 30.sp,
+            text = "${city.name}, ${city.province}",
+            fontSize = 24.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
 
-        Text(
-            text = city.province,
-            fontSize = 30.sp,
-            modifier = Modifier.weight(1f)
-        )
+        TextButton(onClick = onDelete) {
+            Text("Delete", color = MaterialTheme.colorScheme.error)
+        }
     }
 }
 
@@ -213,7 +228,8 @@ fun CityListScreenPreview() {
                 City("Calgary", "AB")
             ),
             onAddCity = {},
-            onUpdateCity = { _, _ -> }
+            onUpdateCity = { _, _ -> },
+            onDeleteCity = {}
         )
     }
 }
